@@ -37,19 +37,25 @@ public class TemplateImport {
             System.out.println("请输入数据库表名:例子legend_shop");
             String tableName = sc.next();
 
-            importDataToDB(tableName,file);
+            //读取excel数据
+            readExcelData(tableName, file);
         }
 
 
     }
 
-    public static void importDataToDB(String tableName, File file) {
+    /**
+     * 读取excel数据
+     *
+     */
+    public static void readExcelData(String tableName, File file) {
 
         try {
             //开始Excel数据导入
             if (file.isFile() && file.exists()) {
                 List<List<Object>> excelList = ExcelReader.readExcel(file);
                 if(!CollectionUtils.isEmpty(excelList)){
+                    //组装insert into 头部sql
                     String prefixStr = createPrefixStr(tableName,excelList);
                     Integer fieldSize = excelList.get(0).size();//源文件字段数
                     Integer excelListSize = excelList.size();//源文件总行数
@@ -57,10 +63,10 @@ public class TemplateImport {
 
                         List totalList = new ArrayList();
 
-                        //数据校验
                         for (int i = 1; i < excelListSize; i++) {
                             List list = new LinkedList();
 
+                            //组装一行数据
                             for (int j = 0; j < fieldSize; j++) {
                                 list.add(excelList.get(i).get(j));
                             }
@@ -69,6 +75,7 @@ public class TemplateImport {
 
                         if (!CollectionUtils.isEmpty(totalList)) {
 
+                            //生成批量insert sql
                             batchInsert(prefixStr,totalList,file);
                         } else {
                             System.out.println(">>>>>>>>>>>>源文件没有数据!");
@@ -96,10 +103,9 @@ public class TemplateImport {
 
         Integer MAX_SIZE = 1000 ;//默认批量插入1000行
 
-        int totalSize = list.size();
+        int totalSize = list.size();//总行数
         int size = totalSize % MAX_SIZE == 0 ? totalSize / MAX_SIZE : totalSize / MAX_SIZE + 1;
         List<List> subList;
-
 
         for (int i = 0; i < size; i++) {
             if (i + 1 == size) {
@@ -107,7 +113,6 @@ public class TemplateImport {
             } else {
                 subList = list.subList(i * MAX_SIZE, i * MAX_SIZE + MAX_SIZE);
             }
-
 
             StringBuffer sb = new StringBuffer(prefixStr);
             for (List listVo : subList) {
@@ -122,6 +127,7 @@ public class TemplateImport {
             }
             sb.deleteCharAt(sb.lastIndexOf(",")).append(";");
 
+            //写批量的insert sql到文件中
             writeToFile(file, sb.toString(),1);
 
         }
@@ -143,10 +149,9 @@ public class TemplateImport {
             }
             FileWriter fw;
             if (type == 0) {
-                fw = new FileWriter(filePath);
+                fw = new FileWriter(filePath);//清空文件内容再插入
             } else {
-                fw = new FileWriter(filePath,true);
-
+                fw = new FileWriter(filePath,true);//append到文件末尾
             }
 
             fw.write(data);
@@ -174,6 +179,7 @@ public class TemplateImport {
                 prefixSb.append(fieldName).append(",");
             }
         }
+        //截掉最后一个逗号
         prefixSb.deleteCharAt(prefixSb.lastIndexOf(",")).append(") VALUES");
 
         return prefixSb.toString();
