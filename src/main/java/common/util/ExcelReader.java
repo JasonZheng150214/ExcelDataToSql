@@ -37,26 +37,6 @@ public class ExcelReader {
         }
     }
 
-    public static List<List<Object>> readExcel(File file,Integer colspan) throws IOException {
-        String fileName = file.getName();
-        String extension = fileName.lastIndexOf(".") == -1 ?
-                "" :
-                fileName.substring(fileName.lastIndexOf(".") + 1);
-        if ("xls".equals(extension)) {
-            return read2003Excel(file,colspan);
-        } else if ("xlsx".equals(extension)) {
-            return read2007Excel(file,colspan);
-        } else {
-            throw new IOException("不支持的文件类型");
-        }
-    }
-
-    /**
-     * 读取 office 2003 excel
-     *
-     * @throws IOException
-     * @throws FileNotFoundException
-     */
     /**
      * 读取 office 2003 excel
      *
@@ -70,8 +50,9 @@ public class ExcelReader {
         Object value = null;
         HSSFRow row = null;
         HSSFCell cell = null;
+        //行数循环
         for (int i = sheet.getFirstRowNum(); i < sheet.getPhysicalNumberOfRows(); i++) {
-            row = sheet.getRow(i);
+            row = sheet.getRow(i);//第i行对象
             if (row == null) {
                 continue;
             }
@@ -81,22 +62,18 @@ public class ExcelReader {
             }
 
             if(colspan ==null){
-                colspan = Integer.valueOf(row.getLastCellNum());
+                colspan = Integer.valueOf(row.getLastCellNum());//多少列
             }
             for (int j = row.getFirstCellNum(); j < colspan; j++) {
-                //            for (int j = row.getFirstCellNum(); j <= 40; j++) {
-
                 cell = row.getCell(j);
                 if (cell == null) {
                     value = "";
 
-                    //    continue;
                 } else {
                     DecimalFormat df = new DecimalFormat("0.00000000");// 格式化 number String 字符
                     DecimalFormat nf = new DecimalFormat("0");// 格式化数字
                     switch (cell.getCellType()) {
                         case XSSFCell.CELL_TYPE_STRING:
-                            //    System.out.println(i+"行"+j+" 列 is String type");
                             value = cell.getStringCellValue();
                             break;
                         case XSSFCell.CELL_TYPE_NUMERIC:
@@ -124,27 +101,20 @@ public class ExcelReader {
                             }
                             break;
                         case XSSFCell.CELL_TYPE_BOOLEAN:
-                            //   System.out.println(i+"行"+j+" 列 is Boolean type");
                             value = cell.getBooleanCellValue();
                             break;
                         case XSSFCell.CELL_TYPE_BLANK:
-                            //    System.out.println(i+"行"+j+" 列 is Blank type");
                             value = "";
                             break;
                         default:
-                            //    System.out.println(i+"行"+j+" 列 is default type");
                             value = cell.toString();
                     }
                     if (value == null || ((String) value).trim().equals("")) {
-                        //    continue;
-                        // 	   System.out.println(i+"行"+j+" 列 is null type");
                         value = "";
                     }
-
                 }
                 linked.add(value);
             }
-
             list.add(linked);
         }
         return list;
@@ -270,13 +240,4 @@ public class ExcelReader {
         }
         return list;
     }
-
-    /*public static void main(String[] args) throws IOException {
-        File file = new File("d:\\test.xlsx");
-        List<List<Object>> list = readExcel(file);
-        //	System.out.println(list);
-        for (int i = 0; i < list.size(); i++) {
-            System.out.println(list.get(i));
-        }
-    }*/
 }
