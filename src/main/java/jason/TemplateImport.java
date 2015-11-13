@@ -116,7 +116,7 @@ public class TemplateImport {
 
             StringBuffer sb = new StringBuffer(prefixStr);
             for (List listVo : subList) {
-                sb.append(" ( ");
+                sb.append(" ( now(), now(), ");
 
                 for (Object s : listVo) {
 
@@ -171,7 +171,7 @@ public class TemplateImport {
     public static String createPrefixStr (String tableName, List<List<Object>> excelList) {
         Integer fieldSize = excelList.get(0).size();//源文件字段数
         StringBuffer prefixSb = new StringBuffer("INSERT INTO ");
-        prefixSb.append(tableName).append(" (");
+        prefixSb.append(tableName).append(" ( gmt_create, gmt_modified, ");
         for (int j = 0; j < fieldSize; j++) {
 
             String fieldName = (String) excelList.get(0).get(j);
