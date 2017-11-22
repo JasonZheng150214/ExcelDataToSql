@@ -8,6 +8,7 @@ import java.util.Date;
  */
 public class DateUtil {
 
+    public static final String test = "测试";
 
     public static String convertDatetYMDHMS(Date date) {
         if (date == null) {
